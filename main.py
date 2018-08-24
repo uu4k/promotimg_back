@@ -31,6 +31,7 @@ def create(request):
     textcolor = request.json['textcolor']
     bgcolor = request.json['bgcolor']
     textsize = int(request.json['textsize']) # px
+    textsize_point = textsize / 1.33
     
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -54,48 +55,46 @@ def create(request):
         # width = int(width)
         # height = int(height)
 
-        ## TODO 縦書きの場合の改行補正
-        srctext = text
-
-        ## 文字列画像出力
-        textsize_point = textsize / 1.33
         textimage = tmpdir + '/textimage' + ext
-        command = ['convert', \
-            '-font', './mplus-1c-bold.ttf', \
-            '-size', width + 'x', \
-            '-pointsize', str(textsize_point), \
-            '-gravity', 'center', \
-            '-background', bgcolor, \
-            '-fill', textcolor, \
-            'caption:' + srctext, \
-            textimage \
-            ]
-        logging.info('create text image.')
-        logging.info(' '.join(command))
-        res = subprocess.run(command)
-        # TODO エラー判定
-
-        # 元画像と文字列画像結合
         joinedimage = tmpdir + '/joinedimage' + ext
+        if textposition in ['right', 'left']:
+            ## 文字列画像出力
+            create_vertical_textimage(
+                text, textsize_point, textcolor, bgcolor, height, textimage)
 
-        # 縦に結合
-        command = ['convert', \
-            '-append', \
-            baseimage, textimage, \
-            '-geometry', width+'x', \
-            joinedimage
-        ]
-        logging.info('join image.')
-        logging.info(' '.join(command))
-        res = subprocess.run(command)
+            # 元画像と文字列画像結合
+            images = [baseimage, textimage]
+            if textposition == 'left':
+                images.reverse()
+            
+            command = ['convert', \
+                '+append', \
+                *images, \
+                '-geometry', 'x'+height, \
+                joinedimage
+            ]
+            logging.info('join image.')
+            logging.info(' '.join(command))
+            res = subprocess.run(command)
 
-        # 横に結合
-        # res = subprocess.run(['convert', \
-        #     '+append', \
-        #     baseimage, textimage, \
-        #     '-geometry', 'x'+height, \
-        #     joinedimage
-        # ])
+        elif textposition in ['top', 'bottom']:
+            ## 文字列画像出力
+            create_horizontal_textimage(
+                text, textsize_point, textcolor, bgcolor, width, textimage)
+
+            # 元画像と文字列画像結合
+            images = [baseimage, textimage]
+            if textposition == 'top':
+                images.reverse()
+            command = ['convert', \
+                '-append', \
+                *images, \
+                '-geometry', width+'x', \
+                joinedimage
+            ]
+            logging.info('join image.')
+            logging.info(' '.join(command))
+            res = subprocess.run(command)
 
         # 画像をgcsにアップ
         logging.info('upload image.')
@@ -110,3 +109,71 @@ def create(request):
         # gcsの画像のURLをレスポンスとして返却(json形式)
         logging.info('image url:' + blob.public_url)
         return jsonify({ 'url': blob.public_url })
+
+def convert_to_vertical_string(text):
+    lines = text.split("\n")
+    line_chars = []
+    for l in lines:
+        line_chars.append([c for c in l])
+
+    converted_lines = []
+    for index, chars in enumerate(line_chars):
+        converted_line = ""
+        for char in chars:
+            # TODO 半角英数文字列判定
+            converted_line += char
+            converted_line += "\n"
+        converted_lines.append(converted_line[:-1])
+
+    return converted_lines
+
+
+def create_vertical_textimage(text, textsize_point, textcolor, bgcolor, height, textimage):
+    ## 縦書きの場合の改行補正
+    vertical_texts = convert_to_vertical_string(text)
+    ## 行ごとに画像化して結合
+    textimages = []
+    for index, srctext in enumerate(vertical_texts):
+        basepath, ext = os.path.splitext(textimage)
+        _textimage = basepath + '.' + str(index) + ext
+        command = ['convert', \
+            '-font', './mplus-1c-bold.ttf', \
+            '-size', 'x' + height, \
+            '-pointsize', str(textsize_point), \
+            '-gravity', 'center', \
+            '-background', bgcolor, \
+            '-fill', textcolor, \
+            'caption:' + srctext, \
+            _textimage \
+            ]
+        logging.info('create text image.(' + str(index) + ')')
+        logging.info(' '.join(command))
+        res = subprocess.run(command)
+        textimages.append(_textimage)
+    
+    textimages.reverse()
+    command = ['convert', \
+        '+append', \
+        *textimages, \
+        '-geometry', 'x'+height, \
+        textimage
+    ]
+    logging.info('create text image.')
+    logging.info(' '.join(command))
+    res = subprocess.run(command)
+
+
+def create_horizontal_textimage(text, textsize_point, textcolor, bgcolor, width, textimage):
+    command = ['convert', \
+        '-font', './mplus-1c-bold.ttf', \
+        '-size', width + 'x', \
+        '-pointsize', str(textsize_point), \
+        '-gravity', 'center', \
+        '-background', bgcolor, \
+        '-fill', textcolor, \
+        'caption:' + text, \
+        textimage \
+        ]
+    logging.info('create text image.')
+    logging.info(' '.join(command))
+    res = subprocess.run(command)
