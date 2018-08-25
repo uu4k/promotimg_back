@@ -4,6 +4,7 @@ import tempfile
 import base64
 import os
 import uuid
+import flask
 from google.cloud import storage
 from flask import abort, jsonify
 
@@ -12,7 +13,13 @@ def image(request):
     # 分岐
     # http://flask.pocoo.org/docs/1.0/api/#flask.Request.path
     if request.method == 'POST':
-        return create(request)
+        resp = create(request)
+        add_access_control_headers(resp)
+        return resp
+    elif request.method == 'OPTIONS':
+        resp = flask.Response("Access-Control-Allow")
+        add_access_control_headers(resp)
+        return resp
 
     abort(404)
 
@@ -24,8 +31,7 @@ def create(request):
 
     logging.info('start create image.')
 
-    # res = subprocess.run(['convert', '-list', 'font'], stdout=subprocess.PIPE)
-    # return res.stdout.decode('utf-8')
+    # TODO validation
     text = request.json['text']
     textposition = request.json['textposition']
     textcolor = request.json['textcolor']
@@ -177,3 +183,11 @@ def create_horizontal_textimage(text, textsize_point, textcolor, bgcolor, width,
     logging.info('create text image.')
     logging.info(' '.join(command))
     res = subprocess.run(command)
+
+def add_access_control_headers(response):
+    # TODO ドメイン絞る
+    response.headers['Access-Control-Allow-Origin'] = "*"
+    response.headers['Access-Control-Allow-Headers'] = "Content-Type"
+    response.headers['Access-Control-Allow-Methods'] = "POST,OPTIONS"
+
+    return response
