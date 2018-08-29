@@ -36,12 +36,12 @@ def client():
     # bucket.delete(force=True)
 
 
-def test_404(client):
+def test_image_404(client):
     rv = client.get('/')
     assert rv.status_code == 404
 
 
-def test_1lineText_right(client):
+def test_image_1lineText_right(client):
     testimgstr = base64.b64encode(
         open('./test_main_001.png', 'rb').read()).decode('utf-8')
     rv = client.post('/', json={
@@ -49,13 +49,12 @@ def test_1lineText_right(client):
         'textposition': 'right',
         'textcolor': '#FFF000',
         'bgcolor': '#000FFF',
-        'textsize': '22',
+        'textsize': 22,
         'baseimagename': 'sample.png',
         'baseimage': testimgstr,
     })
 
     # TODO 画像判定
-
     assert rv.is_json == True
     assert 'url' in rv.get_json()
 
@@ -67,7 +66,7 @@ def test_2lineText_right(client):
         'textposition': 'right',
         'textcolor': '#FFF000',
         'bgcolor': '#000FFF',
-        'textsize': '22',
+        'textsize': 22,
         'baseimagename': 'sample.png',
         'baseimage': testimgstr,
     })
@@ -77,7 +76,7 @@ def test_2lineText_right(client):
     assert rv.is_json == True
     assert 'url' in rv.get_json()
 
-def test_1lineText_left(client):
+def test_image_1lineText_left(client):
     testimgstr = base64.b64encode(
         open('./test_main_001.png', 'rb').read()).decode('utf-8')
     rv = client.post('/', json={
@@ -85,7 +84,7 @@ def test_1lineText_left(client):
         'textposition': 'left',
         'textcolor': '#FFF000',
         'bgcolor': '#000FFF',
-        'textsize': '22',
+        'textsize': 22,
         'baseimagename': 'sample.png',
         'baseimage': testimgstr,
     })
@@ -95,7 +94,8 @@ def test_1lineText_left(client):
     assert rv.is_json == True
     assert 'url' in rv.get_json()
 
-def test_2lineText_left(client):
+
+def test_image_2lineText_left(client):
     testimgstr = base64.b64encode(
         open('./test_main_001.png', 'rb').read()).decode('utf-8')
     rv = client.post('/', json={
@@ -103,7 +103,7 @@ def test_2lineText_left(client):
         'textposition': 'left',
         'textcolor': '#FFF000',
         'bgcolor': '#000FFF',
-        'textsize': '22',
+        'textsize': 22,
         'baseimagename': 'sample.png',
         'baseimage': testimgstr,
     })
@@ -113,7 +113,8 @@ def test_2lineText_left(client):
     assert rv.is_json == True
     assert 'url' in rv.get_json()
 
-def test_1lineText_top(client):
+
+def test_image_1lineText_top(client):
     testimgstr = base64.b64encode(
         open('./test_main_001.png', 'rb').read()).decode('utf-8')
     rv = client.post('/', json={
@@ -121,7 +122,7 @@ def test_1lineText_top(client):
         'textposition': 'top',
         'textcolor': '#FFF000',
         'bgcolor': '#000FFF',
-        'textsize': '22',
+        'textsize': 22,
         'baseimagename': 'sample.png',
         'baseimage': testimgstr,
     })
@@ -131,7 +132,8 @@ def test_1lineText_top(client):
     assert rv.is_json == True
     assert 'url' in rv.get_json()
 
-def test_2lineText_top(client):
+
+def test_image_2lineText_top(client):
     testimgstr = base64.b64encode(
         open('./test_main_001.png', 'rb').read()).decode('utf-8')
     rv = client.post('/', json={
@@ -139,7 +141,7 @@ def test_2lineText_top(client):
         'textposition': 'top',
         'textcolor': '#FFF000',
         'bgcolor': '#000FFF',
-        'textsize': '22',
+        'textsize': 22,
         'baseimagename': 'sample.png',
         'baseimage': testimgstr,
     })
@@ -149,7 +151,8 @@ def test_2lineText_top(client):
     assert rv.is_json == True
     assert 'url' in rv.get_json()
 
-def test_1lineText_bottom(client):
+
+def test_image_1lineText_bottom(client):
     testimgstr = base64.b64encode(
         open('./test_main_001.png', 'rb').read()).decode('utf-8')
     rv = client.post('/', json={
@@ -157,7 +160,7 @@ def test_1lineText_bottom(client):
         'textposition': 'bottom',
         'textcolor': '#FFF000',
         'bgcolor': '#000FFF',
-        'textsize': '22',
+        'textsize': 22,
         'baseimagename': 'sample.png',
         'baseimage': testimgstr,
     })
@@ -167,7 +170,8 @@ def test_1lineText_bottom(client):
     assert rv.is_json == True
     assert 'url' in rv.get_json()
 
-def test_2lineText_bottom(client):
+
+def test_image_2lineText_bottom(client):
     testimgstr = base64.b64encode(
         open('./test_main_001.png', 'rb').read()).decode('utf-8')
     rv = client.post('/', json={
@@ -175,7 +179,7 @@ def test_2lineText_bottom(client):
         'textposition': 'bottom',
         'textcolor': '#FFF000',
         'bgcolor': '#000FFF',
-        'textsize': '22',
+        'textsize': 22,
         'baseimagename': 'sample.png',
         'baseimage': testimgstr,
     })
@@ -184,6 +188,155 @@ def test_2lineText_bottom(client):
 
     assert rv.is_json == True
     assert 'url' in rv.get_json()
+
+
+def test_image_400(client):
+    testimgstr = base64.b64encode(
+        open('./test_main_001.png', 'rb').read()).decode('utf-8')
+    rv = client.post('/', json={
+        # 'text': 'サンプル',
+        'textposition': 'right',
+        'textcolor': '#FFF000',
+        'bgcolor': '#000FFF',
+        'textsize': 22,
+        'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'text\' is a required property' in rv.data
+
+    rv = client.post('/', json={
+        'text': 1,
+        'textposition': 'right',
+        'textcolor': '#FFF000',
+        'bgcolor': '#000FFF',
+        'textsize': 22,
+        'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'1 is not of type \'string\'' in rv.data
+
+    rv = client.post('/', json={
+        'text': 'サンプル',
+        # 'textposition': 'right',
+        'textcolor': '#FFF000',
+        'bgcolor': '#000FFF',
+        'textsize': 22,
+        'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'textposition\' is a required property' in rv.data
+
+    rv = client.post('/', json={
+        'text': 'サンプル',
+        'textposition': 'center',
+        'textcolor': '#FFF000',
+        'bgcolor': '#000FFF',
+        'textsize': 22,
+        'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'center\' does not match \'^(right|left|top|bottom)$\'' in rv.data
+
+    rv = client.post('/', json={
+        'text': 'サンプル',
+        'textposition': 'right',
+        # 'textcolor': '#FFF000',
+        'bgcolor': '#000FFF',
+        'textsize': 22,
+        'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'textcolor\' is a required property' in rv.data
+
+    rv = client.post('/', json={
+        'text': 'サンプル',
+        'textposition': 'right',
+        'textcolor': '#FFF00',
+        'bgcolor': '#000FFF',
+        'textsize': 22,
+        'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'#FFF00\' does not match \'^#[A-F0-9]{6}\'' in rv.data
+
+    rv = client.post('/', json={
+        'text': 'サンプル',
+        'textposition': 'right',
+        'textcolor': '#FFF000',
+        # 'bgcolor': '#000FFF',
+        'textsize': 22,
+        'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'bgcolor\' is a required property' in rv.data
+
+    rv = client.post('/', json={
+        'text': 'サンプル',
+        'textposition': 'right',
+        'textcolor': '#FFF000',
+        'bgcolor': '#000FF',
+        'textsize': 22,
+        'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'#000FF\' does not match \'^#[A-F0-9]{6}\'' in rv.data
+
+
+    rv = client.post('/', json={
+        'text': 'サンプル',
+        'textposition': 'right',
+        'textcolor': '#FFF000',
+        'bgcolor': '#000FFF',
+        # 'textsize': 22,
+        'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'textsize\' is a required property' in rv.data
+
+    rv = client.post('/', json={
+        'text': 'サンプル',
+        'textposition': 'right',
+        'textcolor': '#FFF000',
+        'bgcolor': '#000FFF',
+        'textsize': 22,
+        # 'baseimagename': 'sample.png',
+        'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'baseimagename\' is a required property' in rv.data
+
+    rv = client.post('/', json={
+        'text': 'サンプル',
+        'textposition': 'right',
+        'textcolor': '#FFF000',
+        'bgcolor': '#000FFF',
+        'textsize': 22,
+        'baseimagename': 'sample.png',
+        # 'baseimage': testimgstr,
+    })
+
+    assert rv.status_code == 400
+    assert b'\'baseimage\' is a required property' in rv.data
+
 
 
 def test_convert_to_vertical_string(client):

@@ -7,6 +7,7 @@ import uuid
 import flask
 from google.cloud import storage
 from flask import abort, jsonify
+from jsonschema import validate, ValidationError
 
 
 def image(request):
@@ -24,6 +25,47 @@ def image(request):
     abort(404)
 
 
+schema = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "properties": {
+        "text": {
+            "type": "string"
+        },
+        "textposition": {
+            "type": "string",
+            "pattern": "^(right|left|top|bottom)$"
+        },
+        "textcolor": {
+            "type": "string",
+            "pattern": "^#[A-F0-9]{6}"
+        },
+        "bgcolor": {
+            "type": "string",
+            "pattern": "^#[A-F0-9]{6}"
+        },
+        "textsize": {
+            "type": "number"
+        },
+        "baseimagename": {
+            "type": "string"
+        },
+        "baseimage": {
+            "type": "string"
+        }
+    },
+    "required": [
+        "text",
+        "textposition",
+        "textcolor",
+        "bgcolor",
+        "textsize",
+        "baseimagename",
+        "baseimage",
+    ],
+    "additionalProperties": False,
+    "type": "object"
+}
+
 def create(request):
     if request.headers['Content-Type'] != 'application/json':
         abort(404)
@@ -31,13 +73,20 @@ def create(request):
 
     logging.info('start create image.')
 
-    # TODO validation
+    try:
+        validate(request.json, schema)
+    except ValidationError as e:
+        m = 'Invalid JSON - {0}'.format(e.message)
+        logging.error(m)
+        abort(400, {'message': m})
+
     text = request.json['text']
     textposition = request.json['textposition']
     textcolor = request.json['textcolor']
     bgcolor = request.json['bgcolor']
     textsize = int(request.json['textsize']) # px
-    textsize_point = textsize / 1.33
+    # textsize_point = textsize / 1.33
+    textsize_point = textsize
     
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -47,6 +96,7 @@ def create(request):
         with open(baseimage, "wb") as fh:
             fh.write(base64.b64decode(request.json['baseimage']))
         
+        # TODO 画像ファイルか判定
 
         
         # 文字列画像イメージ作成
@@ -123,7 +173,7 @@ def convert_to_vertical_string(text):
         line_chars.append([c for c in l])
 
     converted_lines = []
-    for index, chars in enumerate(line_chars):
+    for chars in line_chars:
         converted_line = ""
         for char in chars:
             # TODO 半角英数文字列判定
