@@ -26,14 +26,19 @@ def image(request):
 
 
 schema = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
+    "$schema": "http://json-schema.org/draft-06/schema#",
     "properties": {
         "text": {
             "type": "string"
         },
         "textposition": {
             "type": "string",
-            "pattern": "^(right|left|top|bottom)$"
+            "enum": [
+                "right",
+                "left",
+                "top",
+                "bottom"
+            ]
         },
         "textcolor": {
             "type": "string",
