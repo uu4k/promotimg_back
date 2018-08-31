@@ -243,8 +243,7 @@ def create_horizontal_textimage(text, textsize_point, textcolor, bgcolor, width,
     res = subprocess.run(command, check=True)
 
 def add_access_control_headers(response):
-    # TODO ドメイン絞る
-    response.headers['Access-Control-Allow-Origin'] = "*"
+    response.headers['Access-Control-Allow-Origin'] = "promotimg.uu4k.me"
     response.headers['Access-Control-Allow-Headers'] = "Content-Type"
     response.headers['Access-Control-Allow-Methods'] = "POST,OPTIONS"
 
