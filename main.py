@@ -42,11 +42,11 @@ schema = {
         },
         "textcolor": {
             "type": "string",
-            "pattern": "^#[A-F0-9]{6}"
+            "pattern": "^#[a-fA-F0-9]{6}"
         },
         "bgcolor": {
             "type": "string",
-            "pattern": "^#[A-F0-9]{6}"
+            "pattern": "^#[a-fA-F0-9]{6}"
         },
         "textsize": {
             "type": "number"
@@ -110,7 +110,7 @@ def create(request):
         command = ['identify', '-format', '%wx%h', baseimage]
         logging.info('identify base image.')
         logging.info(' '.join(command))
-        res = subprocess.run(command, stdout=subprocess.PIPE)
+        res = subprocess.run(command, stdout=subprocess.PIPE, check=True)
         width_x_height = res.stdout.decode('utf-8')
         width, height = width_x_height.split("x")
         # width = int(width)
@@ -136,7 +136,7 @@ def create(request):
             ]
             logging.info('join image.')
             logging.info(' '.join(command))
-            res = subprocess.run(command)
+            res = subprocess.run(command, check=True)
 
         elif textposition in ['top', 'bottom']:
             ## 文字列画像出力
@@ -155,7 +155,7 @@ def create(request):
             ]
             logging.info('join image.')
             logging.info(' '.join(command))
-            res = subprocess.run(command)
+            res = subprocess.run(command, check=True)
 
         # 画像をgcsにアップ
         logging.info('upload image.')
@@ -181,6 +181,8 @@ def convert_to_vertical_string(text):
     for chars in line_chars:
         converted_line = ""
         for char in chars:
+            if char == 'ー':
+                char = '｜'
             # TODO 半角英数文字列判定
             converted_line += char
             converted_line += "\n"
@@ -201,6 +203,7 @@ def create_vertical_textimage(text, textsize_point, textcolor, bgcolor, height, 
             '-font', './mplus-1c-bold.ttf', \
             '-size', 'x' + height, \
             '-pointsize', str(textsize_point), \
+            '-interline-spacing', '-10', \
             '-gravity', 'center', \
             '-background', bgcolor, \
             '-fill', textcolor, \
@@ -209,7 +212,7 @@ def create_vertical_textimage(text, textsize_point, textcolor, bgcolor, height, 
             ]
         logging.info('create text image.(' + str(index) + ')')
         logging.info(' '.join(command))
-        res = subprocess.run(command)
+        res = subprocess.run(command, check=True)
         textimages.append(_textimage)
     
     textimages.reverse()
@@ -221,7 +224,7 @@ def create_vertical_textimage(text, textsize_point, textcolor, bgcolor, height, 
     ]
     logging.info('create text image.')
     logging.info(' '.join(command))
-    res = subprocess.run(command)
+    res = subprocess.run(command, check=True)
 
 
 def create_horizontal_textimage(text, textsize_point, textcolor, bgcolor, width, textimage):
@@ -237,7 +240,7 @@ def create_horizontal_textimage(text, textsize_point, textcolor, bgcolor, width,
         ]
     logging.info('create text image.')
     logging.info(' '.join(command))
-    res = subprocess.run(command)
+    res = subprocess.run(command, check=True)
 
 def add_access_control_headers(response):
     # TODO ドメイン絞る

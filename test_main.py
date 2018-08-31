@@ -243,7 +243,7 @@ def test_image_400(client):
     })
 
     assert rv.status_code == 400
-    assert b'\'center\' does not match \'^(right|left|top|bottom)$\'' in rv.data
+    assert b'\'center\' is not one of [\'right\', \'left\', \'top\', \'bottom\']' in rv.data
 
     rv = client.post('/', json={
         'text': 'サンプル',
@@ -269,7 +269,7 @@ def test_image_400(client):
     })
 
     assert rv.status_code == 400
-    assert b'\'#FFF00\' does not match \'^#[A-F0-9]{6}\'' in rv.data
+    assert b'\'#FFF00\' does not match \'^#[a-fA-F0-9]{6}\'' in rv.data
 
     rv = client.post('/', json={
         'text': 'サンプル',
@@ -295,7 +295,7 @@ def test_image_400(client):
     })
 
     assert rv.status_code == 400
-    assert b'\'#000FF\' does not match \'^#[A-F0-9]{6}\'' in rv.data
+    assert b'\'#000FF\' does not match \'^#[a-fA-F0-9]{6}\'' in rv.data
 
 
     rv = client.post('/', json={
